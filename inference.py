@@ -120,10 +120,19 @@ def log_step(step: int, action_repr: str, reward: float, done: bool, error: str 
     )
 
 
+def _strict_score(raw_score: float) -> float:
+    epsilon = 0.001
+    if not isinstance(raw_score, (int, float)):
+        return epsilon
+    bounded = min(max(float(raw_score), 0.0), 1.0)
+    return epsilon + bounded * (1.0 - 2.0 * epsilon)
+
+
 def log_end(success: bool, steps: int, score: float, rewards: List[float]) -> None:
+    score_out = _strict_score(score)
     rewards_str = ",".join(f"{reward:.2f}" for reward in rewards)
     print(
-        f"[END] success={str(success).lower()} steps={steps} score={score:.2f} rewards={rewards_str}",
+        f"[END] success={str(success).lower()} steps={steps} score={score_out:.3f} rewards={rewards_str}",
         flush=True,
     )
 
